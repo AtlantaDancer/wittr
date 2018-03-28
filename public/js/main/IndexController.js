@@ -25,7 +25,15 @@ IndexController.prototype._registerServiceWorker = function() {
   // If the browser doesn't support SW, it'll be undefined, coerce to false, and
   // no SW-related code will run and break the browser. Otherwise we're all good!
   if (sw) {
-    sw.register('/sw.js');
+    // The SW should not compete with system/network resources.
+    // Exception is if you need to do `clients.claim()` ASAP, monitor so you're 
+    // not competing with the main page's requests in that case.
+    // 
+    // Credit:
+    // @link https://developers.google.com/web/fundamentals/primers/service-workers/registration#improving_the_boilerplate
+    window.addEventListener('load', () => {
+      sw.register('/sw.js');
+    });
   }
 };
 
