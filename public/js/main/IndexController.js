@@ -2,17 +2,31 @@ import PostsView from './views/Posts';
 import ToastsView from './views/Toasts';
 import idb from 'idb';
 
+
+// This constructor takes care of the set up of our app, including setting up
+// the web socket for the live updates. For now, we'll ignore everything.
 export default function IndexController(container) {
   this._container = container;
   this._postsView = new PostsView(this._container);
   this._toastsView = new ToastsView(this._container);
   this._lostConnectionToast = null;
-  this._openSocket();
+  this._openSocket(); // Custom code for our app, whatever that is. In this case it's setting up views, getting ready to receive wheats (what's a wheat??).
   this._registerServiceWorker();
 }
 
 IndexController.prototype._registerServiceWorker = function() {
   // TODO: register service worker
+  
+  // Browser's SW isn't going to change, and we'll only refer to this variable  
+  // as serviceWorker, ergo const. 
+  // Also, we won't have to type navigator.serviceWorker more than once.
+  const sw = navigator.serviceWorker;
+  
+  // If the browser doesn't support SW, it'll be undefined, coerce to false, and
+  // no SW-related code will run and break the browser. Otherwise we're all good!
+  if (sw) {
+    sw.register('/sw.js');
+  }
 };
 
 // open a connection to the server for live updates
