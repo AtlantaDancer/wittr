@@ -28,4 +28,13 @@ dbPromise.then(function(db) {
   // TODO: in the keyval store, set
   // "favoriteAnimal" to your favourite animal
   // eg "cat" or "dog"
+  
+  const main_object_store = 'keyval';
+  
+  // We don't need variables for the transaction, object store, or even the put's
+  // Promises as we're not going to be re-using them.
+  return db
+    .transaction(main_object_store, 'readwrite') // I initially forgot the readwrite!
+    .objectStore(main_object_store)    
+    .put('kitten', 'favoriteAnimal'); // The signature of IDB of IDBObjectStore.put is .put(item, key).
 });
