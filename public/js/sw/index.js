@@ -1,4 +1,6 @@
-var staticCacheName = 'wittr-static-v2';
+console.log('wait for it...');
+
+var staticCacheName = 'wittr-static-v3';
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
@@ -40,3 +42,11 @@ self.addEventListener('fetch', function(event) {
 
 // TODO: listen for the "message" event, and call
 // skipWaiting if you get the appropriate message
+
+self.addEventListener('message', event => {
+  const update_hint = event.data.knockknock;
+  if (update_hint && update_hint === 'pizza') {
+    // Who can wait for pizza?!?
+    self.skipWaiting(); // Where there is pizza, this SW shall spontaneously become supreme leader.
+  }
+});

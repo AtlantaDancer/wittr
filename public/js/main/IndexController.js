@@ -38,6 +38,13 @@ IndexController.prototype._registerServiceWorker = function() {
 
   // TODO: listen for the controlling service worker changing
   // and reload the page
+  
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    // You summoned me? 
+    // Say hello to my little friends!
+    // (They want pizza, too.)
+    window.location.reload(true); // "Reload the current page, without using the cache" -https://developer.mozilla.org/en-US/docs/Web/API/Location/reload#Examples
+  });
 };
 
 IndexController.prototype._trackInstalling = function(worker) {
@@ -57,6 +64,11 @@ IndexController.prototype._updateReady = function(worker) {
   toast.answer.then(function(answer) {
     if (answer != 'refresh') return;
     // TODO: tell the service worker to skipWaiting
+    
+    // _updateReady has been updated to accept a Service Worker as its argument.
+    // We use the postMessage method to communicate with the SW, passing along
+    // any value we feel like.
+    worker.postMessage({ knockknock: 'pizza' });
   });
 };
 
