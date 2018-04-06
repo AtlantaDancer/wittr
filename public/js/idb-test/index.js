@@ -12,6 +12,9 @@ var dbPromise = idb.open('test-db', 3, function(upgradeDb) {
       peopleStore.createIndex('animal', 'favoriteAnimal');
   }
   // TODO: create an index on 'people' named 'age', ordered by 'age'
+  upgradeDb
+    .transaction.objectStore('people')
+    .createIndex('age', 'age');
 });
 
 // read "hello" in "keyval"
@@ -88,3 +91,12 @@ dbPromise.then(function(db) {
 });
 
 // TODO: console.log all people ordered by age
+dbPromise.then(function(db) {
+  var tx = db.transaction('people');
+  var peopleStore = tx.objectStore('people');
+  var ageIndex = peopleStore.index('age');
+
+  return ageIndex.getAll();
+}).then(function(people) {
+  console.log('People by age:', people);
+});
