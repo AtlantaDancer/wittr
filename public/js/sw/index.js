@@ -1,6 +1,8 @@
+/* global Promise */
+
 // Step 1. refactor version string into re-usable variables and bump the version
 // number while at it.
-const wittr_version             = '2a';
+const wittr_version             = '2b';
 const wittr_static_cache_prefix = 'wittr-static-v';
 const wittr_static_cache_name   = `${wittr_static_cache_prefix}${wittr_version}`;
 
@@ -32,21 +34,24 @@ self.addEventListener('activate', function(event) {
     // TODO: remove the old cache
     
     // Step 3. 
-    // We grab all the cache names via `caches.keys`. 
-    // We want to delete all caches that are:
-    // 1. Not the current cache,
-    // 2. Do not start with the pattern of our cache names.
-    // 
-    // Note this is less efficient than the previous solution as we loop at most
-    // twice, whereas before we just looped once.
+    // We will loop through all the caches by their names via `caches.keys`.
+    // Then for every cache that isn't the new one, if its name matches the
+    // static name pattern of wittr-static-v, then we know it's an older cache,
+    // and we can safely kill it with fire. safely.
     caches.keys().then(cache_names => {
-      cache_names
-        .filter(cache_name => (cache_name !== wittr_static_cache_name && cache_name.startsWith(wittr_static_cache_prefix)))
-        .map(old_cache_name => caches.delete(old_cache_name));
-      // `caches.keys()` Promise now ends along with `waitUntil` as it is not
-      // waiting on any of the `caches.delete()` above (they also happen
-      // asynchronously and return Promises). This is actually fine, as we don't
-      // want the app to hang while we slay the outdated caches. with fire. safely.
+      // If we want to extend the activate event until the caches actually delete,
+      // we can use Promise.all with an array mixed with undefineds and Promises.
+      // A bunch of undefineds in the array are okay!
+      // "If all of the passed-in promises fulfill, or are not promises, the promise returned by Promise.all is fulfilled asynchronously."
+      // @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all      
+      return Promise.all(
+        cache_names.map(cache_name => {
+          if (cache_name !== wittr_static_cache_name && cache_name.startsWith(wittr_static_cache_prefix)) {
+            return caches.delete(cache_name); // <-- This returns a Promise
+          }
+          // return undefined; // <-- This is what happens here
+        })
+      );
     })
   );
 });

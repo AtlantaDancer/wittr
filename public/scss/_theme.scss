@@ -10,9 +10,9 @@ $divider-color:        #B6B6B6;
 
 // https://www.materialpalette.com/green/pink
 
-// Step 2. Uncommented the below and changed primary color to black.
+// Step 2. Uncommented the below and changed primary color to semi-opaque pink.
 $primary-color-dark:   #388E3C;
-$primary-color:        black;
+$primary-color:        rgba(pink, .5);
 $primary-color-light:  #C8E6C9;
 $primary-color-text:   #FFFFFF;
 $accent-color:         #FF4081;
