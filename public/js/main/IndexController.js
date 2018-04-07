@@ -82,6 +82,41 @@ IndexController.prototype._showCachedMessages = function() {
     // in order of date, starting with the latest.
     // Remember to return a promise that does all this,
     // so the websocket isn't opened until you're done!
+    
+    // Solution #1:
+    // idb-test has all the sample code, however, the order would be all wrong.
+    // How do we retreive all messages (and leave it in a promise?)?
+    // 
+    // If we use openCursor, we can reverse the direction of iteration i.e.
+    // `index.openCursor(null, "prev")`
+    // Credit: https://stackoverflow.com/a/25055070/781824
+    // 
+    // Is there a way to, say, "getAll" via cursor?
+    // Nope.
+    // 
+    // Jake notes promises are tricky with cursor, so iterateCursor is actually 
+    // openCursor that takes a 3rd argument -- a callback function with IDBCursor 
+    // as its argument.
+    /*
+    let messages = new Array();
+    return db.transaction('wittrs').objectStore('wittrs').index('by-date').iterateCursor(null, 'prev', cursor => {
+      if ( ! cursor) {
+        console.log('no cursor', messages); // Proof the messages are sorted as desired.
+        indexController._postsView.addPosts(messages);
+        return;
+      }
+      messages.push(cursor.value);
+      cursor.continue();
+    });
+    */
+    
+    // Solution #2:
+    // Since we can grab all the messages, we can use Array.reverse.
+    return db.transaction('wittrs').objectStore('wittrs').index('by-date').getAll().then(messages => {
+      const descending_messages = messages.reverse();
+      console.log('messages in date descending order ', descending_messages); // Proof the messages are sorted as desired.
+      indexController._postsView.addPosts(descending_messages);
+    });
   });
 };
 
