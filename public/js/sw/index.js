@@ -1,3 +1,4 @@
+/* global Promise */
 var staticCacheName = 'wittr-static-v8';
 var contentImgsCache = 'wittr-content-imgs';
 var allCaches = [
@@ -49,6 +50,11 @@ self.addEventListener('fetch', function(event) {
     }
     // TODO: respond to avatar urls by responding with
     // the return value of serveAvatar(event.request)
+    if (requestUrl.pathname.startsWith('/avatars/')) {
+      event.respondWith(serveAvatar(event.request));
+      return;
+    }
+
   }
 
   event.respondWith(
@@ -71,6 +77,29 @@ function serveAvatar(request) {
   // to update the entry in the cache.
   //
   // Note that this is slightly different to servePhoto!
+  let img_cache;
+  return caches.open(contentImgsCache)
+    // Set img cache for later use, pass along matching cached avatar if any
+    .then(cache => (img_cache = cache).match(storageUrl))
+    
+    // We create a promise in the case that the request already exists in cache,
+    // we can provide that straight away and _then_ do a network request for
+    // an update. If we rely on returning a Response (what serveAvatar expects)
+    // directly, we would have to initiate the network request for an update
+    // before sending back the cached response. (Because you can't run code
+    // after the return.)
+    .then(response => new Promise(
+      resolve => {
+        if (response) {
+          resolve(response);
+        }
+        let latest_avatar = fetch(request).then(networkResponse => {
+          img_cache.put(storageUrl, networkResponse.clone());
+          return networkResponse;
+        });
+        if ( ! response) resolve(latest_avatar);
+      }
+    ));
 }
 
 function servePhoto(request) {
