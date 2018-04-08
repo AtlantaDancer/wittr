@@ -4,6 +4,22 @@ This is a silly little demo app for an offline-first course.
 
 You could run the app either using machine dependnecies, or using docker
 
+## Note to fellow Udacity students
+
+This is my personal fork of wittr that has solutions my second time around the
+course. I attempted to apply what we've learned of ES6 and for the most part did
+not rely on Jake's answers.
+
+I've saved my solutions to quizzes in branches. Their format is 
+```
+lesson-#-#-#-quiz-title
+```
+
+Where the first number is the lesson (3 or 4), the second number is the chapter
+or section, and the last number is the attempt or variant. I tried to leave 
+sufficient comments, but sometimes they're more complementary to my own notes
+than serve as learning material on their own.
+
 ## Running using local machine
 
 ### Installing
