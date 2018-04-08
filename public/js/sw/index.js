@@ -70,6 +70,22 @@ function servePhoto(request) {
   // to the browser.
   //
   // HINT: cache.put supports a plain url as the first parameter
+  
+  // We search our cache for the base photo url
+  return caches.match(storageUrl, { cacheName: contentImgsCache }).then(response => {
+    console.log('in cache?  ', response);
+    // If a match is found, use that, otherwise go over the network for the actually requested image
+    return response || fetch(request).then(
+      img_response => {
+        const reuse_response = img_response.clone(); // We have to make a clone because once we read a stream, its body is gone. poof.
+        console.log('img response? ', storageUrl, reuse_response);
+        // Cache the image albeit against the base photo url as opposed to this specific request.
+        caches.open(contentImgsCache).then(cache => cache.put(storageUrl, reuse_response));
+        return img_response;
+      }
+    );
+  });
+
 }
 
 self.addEventListener('message', function(event) {
