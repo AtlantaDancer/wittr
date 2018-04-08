@@ -164,6 +164,36 @@ IndexController.prototype._cleanImageCache = function() {
     //
     // Open the 'wittr-content-imgs' cache, and delete any entry
     // that you no longer need.
+    
+    // To pass with Test ID cache-clean, disable Update on reload, you have 8s
+    // after entering the above Test ID to then refresh the window/tab with wittr.
+    let tx = db.transaction('wittrs', 'readwrite');
+    let photos = new Array(); // This will get populated soon.
+    let img_cache; // We'll assign this to the 'wittr-content-imgs' cache later, and refer to it even later, time-wise.
+    
+    tx.objectStore('wittrs').getAll()
+      
+      // Populate array of photo urls
+      .then(messages => {        
+        messages.map(message => {        
+          if (message.photo) photos.push(location.origin + message.photo); // cached photos have full url (http://localhost:8888) whereas data.photo is /photos/...
+        });
+        return caches.open('wittr-content-imgs'); // Returning this allows us to continue chaining Promises
+      })
+      
+      // Assign img_cache, pass along array of cached photos.
+      .then(cache => (img_cache = cache).keys())
+      
+      // Iterate over cached photos, if they're not used in our messages, remove them from cache.
+      .then(cached_photos => {      
+        cached_photos.map(cached_photo_request => {
+          if ( ! photos.includes(cached_photo_request.url)) img_cache.delete(cached_photo_request);
+        });
+      }
+    );
+    
+    return tx.complete;
+
   });
 };
 
