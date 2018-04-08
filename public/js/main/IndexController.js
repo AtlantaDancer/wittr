@@ -169,6 +169,31 @@ IndexController.prototype._onSocketMessage = function(data) {
     // Hint: you can use .openCursor(null, 'prev') to
     // open a cursor that goes through an index/store
     // backwards.
+
+    // Solution #1:
+    // We're not going to presume these messages are the latest/sorted by date,
+    // so we won't worry about where the iterating should start, we'll iterate
+    // through the whole table.
+    //let latest = 0;
+    //store.index('by-date').iterateCursor(null, 'prev', cursor => {
+    //  if ( ! cursor) return;
+    //  if (latest >= 30) cursor.delete();
+    //  ++latest;
+    //  cursor.continue();
+    //});
+    
+    // Solution #2:
+    // There has to be a better way than needlessly iterating 30 times.
+    // How do we use advance here?
+    store.index('by-date')
+      .openCursor(null, 'prev')                     // Similar to iterateCursor, we start counting backwards.
+      .then(cursor => cursor.advance(30).then(      // We skip the latest 30 messages.
+        function delete_old_message(old_cursor) {   // No such thing as a named anonymous arrow function.
+          if ( ! old_cursor) return;
+          old_cursor.delete();
+          return old_cursor.continue().then(delete_old_message); // Same function body as Solution #1, except we use recursion instead of iterateCursor even though Jake warns against this and is precisely why iterateCursor exists.
+        }
+      ));
   });
 
   this._postsView.addPosts(messages);
